@@ -5,23 +5,27 @@ import json
 import matplotlib.pyplot as plt
 
 from gym import spaces
+from copy import deepcopy
 
 
-class PointMover(gym.Env):
+class PointMover(gym.GoalEnv):
 
     def __init__(self, max_speed=0.02, image_size=64, max_timesteps=500):
         self.max_speed = max_speed
         self.image_size = image_size
         self.max_timesteps = max_timesteps
+        self.max_episode_length = max_timesteps
         self.step_count = 0
         self.viewer = None
         # Action space is a speed vector with (x, y) coordinates
         self.action_space = spaces.Box(low=-self.max_speed, high=self.max_speed, shape=(2,), dtype=np.float32)
         # Observation space includes both position vector of the dot and the raw image
         # TODO: include goal encoding (DONE)
+        # "rgb_image": spaces.Box(low=0.0, high=1.0, shape=(self.image_size, self.image_size, 3), dtype=np.float32),
         self.observation_space = spaces.Dict({
-            "position": spaces.Box(low=0.0, high=1.0, shape=(4,), dtype=np.float32),
-            "rgb_image": spaces.Box(low=0.0, high=1.0, shape=(self.image_size, self.image_size, 3), dtype=np.float32)
+            "observation": spaces.Box(low=0.0, high=1.0, shape=(4,), dtype=np.float32),
+            "desired_goal": spaces.Box(low=0.0, high=1.0, shape=(2,), dtype=np.float32),
+            "achieved_goal": spaces.Box(low=0.0, high=1.0, shape=(2,), dtype=np.float32)
         })
         self.point_position = np.array([0.5, 0.5], dtype=np.float32)
         self.image = np.zeros(shape=(self.image_size, self.image_size, 3), dtype=np.float32)
@@ -73,7 +77,7 @@ class PointMover(gym.Env):
         self.step_count += 1
         obs = list(np.concatenate([self.point_position, self.goal_state], axis=0))
 
-        return {"position": obs, "rgb_image": self.image}, cost, done, {}
+        return {"observation": obs, "achieved_goal": [obs[0], obs[1]], "desired_goal": self.goal_state}, cost, done, {}
 
     def reset(self):
         # Reset state
@@ -99,12 +103,22 @@ class PointMover(gym.Env):
             self.obs_record_buffer[self.current_episode]['obs'] = []
             self.obs_record_buffer[self.current_episode]['reward'] = []
 
-        return {"position": obs, "rgb_image": self.image}
+        return {"observation": obs, "achieved_goal": [obs[0], obs[1]], "desired_goal": self.goal_state}
 
     def render(self, mode="human"):
         self.fig.set_data(self.image)
         plt.show(block=False)
         plt.pause(1/10)
+
+    def compute_reward(self, achieved_goal, desired_goal, info):
+        rewards = np.zeros(shape=(len(achieved_goal,)))
+        for a, d, i in zip(achieved_goal, desired_goal, range(len(achieved_goal))):
+            if a[0] == d[0] and a[1] == d[1]:
+                rewards[i] = 0.0
+            else:
+                rewards[i] = -1.0
+
+        return rewards
 
     def record(self, obs, done, fname):
         self.obs_record_buffer[self.current_episode]['obs'].append(obs)
