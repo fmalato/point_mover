@@ -7,9 +7,13 @@ from wrappers import PositionOnlyWrapper
 
 
 if __name__ == '__main__':
+    max_episode_length = 50
+    online_sampling = True
+    num_sampled_goals = 4
+    goal_selection_strategy = 'future'
     env = gym.make('point_mover:point_mover-v0')
     #env = PositionOnlyWrapper(env)
-    env = TimeLimit(env, max_episode_steps=100)
+    env = TimeLimit(env, max_episode_steps=max_episode_length)
     obs = env.reset()
     # TODO: DDPG AC + HER
     env.test = False
@@ -18,7 +22,14 @@ if __name__ == '__main__':
     model = DDPG(policy="MultiInputPolicy",
                  env=env,
                  replay_buffer_class=HerReplayBuffer,
-                 buffer_size=50000,
+                 buffer_size=150000,
+                 learning_rate=1e-4,
+                 replay_buffer_kwargs=dict(
+                     n_sampled_goal=num_sampled_goals,
+                     goal_selection_strategy=goal_selection_strategy,
+                     online_sampling=online_sampling,
+                     max_episode_length=max_episode_length,
+                 ),
                  verbose=1)
     model.learn(total_timesteps=100000)
     fname = datetime.now().strftime("%H_%M_%S")
@@ -34,7 +45,7 @@ if __name__ == '__main__':
             obs, rewards, done, info = env.step(action)
             total_reward += rewards
             num_steps += 1
-            #env.render()
+            env.render()
             #env.record(obs, done, fname)
         print('Episode reward: {r} - Number of steps: {s}'.format(r=total_reward, s=num_steps))
         print('Final position: {x}'.format(x=obs))

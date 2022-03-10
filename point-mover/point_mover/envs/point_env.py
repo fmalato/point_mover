@@ -63,10 +63,9 @@ class PointMover(gym.GoalEnv):
         # TODO: Discretize -1 for wrong time step, 0 for goal
         distance = (np.sqrt(np.power((self.point_position[0] - self.goal_state[0]), 2) +
                             np.power((self.point_position[1] - self.goal_state[1]), 2)))
-        cost = -distance * 0.02
-        #cost = -1.0
+        cost = -1.0
         if distance <= 0.01:
-            cost += 2.0
+            cost = 0.0
             done = True
         else:
             if self.step_count < self.max_timesteps:
@@ -113,7 +112,7 @@ class PointMover(gym.GoalEnv):
     def compute_reward(self, achieved_goal, desired_goal, info):
         rewards = np.zeros(shape=(len(achieved_goal,)))
         for a, d, i in zip(achieved_goal, desired_goal, range(len(achieved_goal))):
-            if a[0] == d[0] and a[1] == d[1]:
+            if self._distance(a, d) <= 0.01:
                 rewards[i] = 0.0
             else:
                 rewards[i] = -1.0
@@ -134,3 +133,6 @@ class PointMover(gym.GoalEnv):
         if self.viewer:
             self.viewer.close()
             self.viewer = None
+
+    def _distance(self, a, b):
+        return np.sqrt(np.power((a[0] - b[0]), 2) + np.power((a[1] - b[1]), 2))
