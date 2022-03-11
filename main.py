@@ -10,6 +10,11 @@ if __name__ == '__main__':
     max_episode_length = 50
     online_sampling = True
     num_sampled_goals = 4
+    buffer_size = 200000
+    lr = 1e-4
+    total_timesteps = 1000000
+    save = True
+    model_name = "DDPG_HER_1kk"
     goal_selection_strategy = 'future'
     env = gym.make('point_mover:point_mover-v0')
     #env = PositionOnlyWrapper(env)
@@ -23,7 +28,7 @@ if __name__ == '__main__':
                  env=env,
                  replay_buffer_class=HerReplayBuffer,
                  buffer_size=150000,
-                 learning_rate=1e-4,
+                 learning_rate=lr,
                  replay_buffer_kwargs=dict(
                      n_sampled_goal=num_sampled_goals,
                      goal_selection_strategy=goal_selection_strategy,
@@ -31,9 +36,11 @@ if __name__ == '__main__':
                      max_episode_length=max_episode_length,
                  ),
                  verbose=1)
-    model.learn(total_timesteps=100000)
+    model.learn(total_timesteps=total_timesteps)
     fname = datetime.now().strftime("%H_%M_%S")
-    env.test = True
+    if save:
+        model.save("saved_models/{name}".format(name=model_name))
+    """env.test = True
     for i in range(2):
         obs = env.reset()
         total_reward = 0.0
@@ -48,4 +55,4 @@ if __name__ == '__main__':
             env.render()
             #env.record(obs, done, fname)
         print('Episode reward: {r} - Number of steps: {s}'.format(r=total_reward, s=num_steps))
-        print('Final position: {x}'.format(x=obs))
+        print('Final position: {x}'.format(x=obs))"""
