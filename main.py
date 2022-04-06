@@ -7,16 +7,16 @@ from wrappers import PositionOnlyWrapper
 
 
 if __name__ == '__main__':
-    max_episode_length = 50
+    max_episode_length = 500
     online_sampling = True
     num_sampled_goals = 4
     buffer_size = 200000
     lr = 1e-4
     total_timesteps = 1000000
     save = True
-    model_name = "DDPG_HER_1kk"
+    model_name = "DDPG_HER_1kk_mujoco"
     goal_selection_strategy = 'future'
-    env = gym.make('point_mover:point_mover-v0')
+    env = gym.make('geometry_mover:geometry_mover-v0')
     #env = PositionOnlyWrapper(env)
     env = TimeLimit(env, max_episode_steps=max_episode_length)
     obs = env.reset()
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     if save:
         model.save("saved_models/{name}".format(name=model_name))
     """env.test = True
-    for i in range(2):
+    for i in range(200):
         obs = env.reset()
         total_reward = 0.0
         done = False
