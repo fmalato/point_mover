@@ -17,18 +17,18 @@ class GeometryMover(mujoco_env.MujocoEnv, utils.EzPickle):
             "desired_goal": spaces.Box(low=0.0, high=1.0, shape=(2,), dtype=np.float32),
             "achieved_goal": spaces.Box(low=0.0, high=1.0, shape=(2,), dtype=np.float32)
         })
-        """mujoco_env.MujocoEnv.__init__(self,
-                                      "/Users/federico/PycharmProjects/point_mover/mujoco_geometry_mover/geometry_mover/envs/geometry_mover.xml",
-                                      self.frame_skip)"""
-        # Linux version
         mujoco_env.MujocoEnv.__init__(self,
-                                      "/home/federima/point_mover/mujoco_geometry_mover/geometry_mover/envs/geometry_mover.xml",
+                                      "/Users/federico/PycharmProjects/point_mover/mujoco_geometry_mover/geometry_mover/envs/geometry_mover.xml",
                                       self.frame_skip)
+        # Linux version
+        """mujoco_env.MujocoEnv.__init__(self,
+                                      "/home/federima/point_mover/mujoco_geometry_mover/geometry_mover/envs/geometry_mover.xml",
+                                      self.frame_skip)"""
 
     def step(self, a):
-        state = self.sim.get_state()
         self.do_simulation(a, self.frame_skip)
-        self.camera_position = self.get_body_com("pointer")[:2]
+        pos = self.get_body_com("pointer")[:3]
+        self.camera_position = [pos[0], pos[2]]
         distance = (np.sqrt(np.power((self.camera_position[0] - self.goal_state[0]), 2) +
                             np.power((self.camera_position[1] - self.goal_state[1]), 2)))
         cost = -1.0
@@ -49,10 +49,11 @@ class GeometryMover(mujoco_env.MujocoEnv, utils.EzPickle):
                 "desired_goal": np.array(self.goal_state)}
 
     def reset_model(self):
-        self.camera_position = self.get_body_com("pointer")[:2]
+        pos = self.get_body_com("pointer")[:3]
+        self.camera_position = [pos[0], pos[2]]
         self.goal_state = [np.random.uniform(low=0.0, high=1.0), np.random.uniform(low=0.0, high=1.0)]
         restart_position = [np.random.uniform(low=-1.0, high=1.0), np.random.uniform(low=-1.0, high=1.0)]
-        self.set_state(np.concatenate([restart_position, [0.5, 0, 0, 0, 0]]),
+        self.set_state(np.array([restart_position[0], 1, restart_position[1], 0, 0, 0, 0]),
                        np.concatenate([self.goal_state, [0, 0, 0, 0]]))
         return self._get_obs()
 
