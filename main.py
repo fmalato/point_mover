@@ -7,14 +7,14 @@ from wrappers import PositionOnlyWrapper
 
 
 if __name__ == '__main__':
-    max_episode_length = 500
+    max_episode_length = 50
     online_sampling = True
     num_sampled_goals = 4
     buffer_size = 200000
     lr = 1e-4
-    total_timesteps = 1000000
+    total_timesteps = 100000
     save = True
-    model_name = "DDPG_HER_1kk_mujoco"
+    model_name = "DDPG_HER_100k_mujoco"
     goal_selection_strategy = 'future'
     env = gym.make('geometry_mover:geometry_mover-v0')
     #env = PositionOnlyWrapper(env)
