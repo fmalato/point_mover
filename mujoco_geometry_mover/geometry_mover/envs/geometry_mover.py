@@ -17,8 +17,12 @@ class GeometryMover(mujoco_env.MujocoEnv, utils.EzPickle):
             "desired_goal": spaces.Box(low=0.0, high=1.0, shape=(2,), dtype=np.float32),
             "achieved_goal": spaces.Box(low=0.0, high=1.0, shape=(2,), dtype=np.float32)
         })
-        mujoco_env.MujocoEnv.__init__(self,
+        """mujoco_env.MujocoEnv.__init__(self,
                                       "/Users/federico/PycharmProjects/point_mover/mujoco_geometry_mover/geometry_mover/envs/geometry_mover.xml",
+                                      self.frame_skip)"""
+        # Linux version
+        mujoco_env.MujocoEnv.__init__(self,
+                                      "/home/federima/point_mover/mujoco_geometry_mover/geometry_mover/envs/geometry_mover.xml",
                                       self.frame_skip)
 
     def step(self, a):
