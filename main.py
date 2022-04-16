@@ -12,9 +12,9 @@ if __name__ == '__main__':
     buffer_size = 150000
     lr = 1e-4
     total_timesteps = 1000000
-    train = True
-    save = True
-    on_linux = True
+    train = False
+    save = False
+    on_linux = False
     model_name = "DDPG_HER_1kk_mujoco"
     goal_selection_strategy = 'future'
     env = gym.make('geometry_mover:geometry_mover-v0', on_linux=on_linux)
@@ -36,9 +36,9 @@ if __name__ == '__main__':
                      ),
                      verbose=1)
     else:
-        model = DDPG.load('saved_models/DDPG_HER_1kk_mujoco.zip',
-                          env=env)
-        """model = DDPG(policy="MultiInputPolicy",
+        """model = DDPG.load('saved_models/DDPG_HER_1kk_mujoco.zip',
+                          env=env)"""
+        model = DDPG(policy="MultiInputPolicy",
                      env=env,
                      replay_buffer_class=HerReplayBuffer,
                      buffer_size=buffer_size,
@@ -49,7 +49,7 @@ if __name__ == '__main__':
                          online_sampling=online_sampling,
                          max_episode_length=max_episode_length,
                      ),
-                     verbose=1)"""
+                     verbose=1)
     if train:
         model.learn(total_timesteps=total_timesteps)
         fname = datetime.now().strftime("%H_%M_%S")
