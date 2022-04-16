@@ -7,7 +7,7 @@ from stable_baselines3 import DDPG, HerReplayBuffer
 if __name__ == '__main__':
     max_episode_length = 1000
     online_sampling = True
-    num_sampled_goals = 4
+    num_sampled_goals = 15
     num_test_games = 10
     buffer_size = 150000
     lr = 1e-4
@@ -38,6 +38,18 @@ if __name__ == '__main__':
     else:
         model = DDPG.load('saved_models/DDPG_HER_1kk_mujoco.zip',
                           env=env)
+        """model = DDPG(policy="MultiInputPolicy",
+                     env=env,
+                     replay_buffer_class=HerReplayBuffer,
+                     buffer_size=buffer_size,
+                     learning_rate=lr,
+                     replay_buffer_kwargs=dict(
+                         n_sampled_goal=num_sampled_goals,
+                         goal_selection_strategy=goal_selection_strategy,
+                         online_sampling=online_sampling,
+                         max_episode_length=max_episode_length,
+                     ),
+                     verbose=1)"""
     if train:
         model.learn(total_timesteps=total_timesteps)
         fname = datetime.now().strftime("%H_%M_%S")

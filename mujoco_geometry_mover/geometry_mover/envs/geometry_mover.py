@@ -31,7 +31,7 @@ class GeometryMover(mujoco_env.MujocoEnv, utils.EzPickle):
     def step(self, a):
         self.do_simulation(a, self.frame_skip)
         pos = self.get_body_com("pointer")[:3]
-        self.model.geom_pos[1] = -deepcopy(pos)
+        #self.model.geom_pos[1] = -deepcopy(pos)
         self.camera_position = [pos[0], pos[2]]
         distance = (np.sqrt(np.power((self.camera_position[0] - self.goal_state[0]), 2) +
                             np.power((self.camera_position[1] - self.goal_state[1]), 2)))
@@ -53,17 +53,16 @@ class GeometryMover(mujoco_env.MujocoEnv, utils.EzPickle):
                 "desired_goal": np.array(self.goal_state)}
 
     def reset_model(self):
-        self.model.body_pos[1] = [np.random.uniform(low=0.0, high=1.0), 0.75, np.random.uniform(low=0.0, high=1.0)]
+        #self.model.body_pos[1] = [np.random.uniform(low=0.0, high=1.0), 0.75, np.random.uniform(low=0.0, high=1.0)]
         pos = self.get_body_com("pointer")[:3]
         self.camera_position = [pos[0], pos[2]]
-        self.model.geom_pos[1] = -deepcopy(pos)
+        #self.model.geom_pos[1] = -deepcopy(pos)
         self.goal_state = [np.random.uniform(low=0.0, high=1.0), np.random.uniform(low=0.0, high=1.0)]
-        restart_position = [np.random.uniform(low=-1.0, high=1.0), np.random.uniform(low=-1.0, high=1.0)]
         # TODO: consider case of more than one object
         self.model.body_pos[2] = [np.random.uniform(low=-2.0, high=2.0), 0, np.random.uniform(low=2.0, high=4.0)]
         # self.model.body_quat[2] = [1, 0, np.random.randint(low=-90, high=90), 0]
-        self.set_state(np.array([restart_position[0], restart_position[1]]),
-                       np.array(self.goal_state))
+        self.set_state(np.array([1, 0, 0, 0]),
+                       np.array([0, 0, 0]))
         return self._get_obs()
 
     def viewer_setup(self):
