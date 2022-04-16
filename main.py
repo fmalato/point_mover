@@ -8,14 +8,16 @@ if __name__ == '__main__':
     max_episode_length = 1000
     online_sampling = True
     num_sampled_goals = 4
-    buffer_size = 200000
+    num_test_games = 10
+    buffer_size = 150000
     lr = 1e-4
-    total_timesteps = 5000000
+    total_timesteps = 1000000
     train = False
-    save = True
+    save = False
+    on_linux = False
     model_name = "DDPG_HER_5kk_mujoco"
     goal_selection_strategy = 'future'
-    env = gym.make('geometry_mover:geometry_mover-v0')
+    env = gym.make('geometry_mover:geometry_mover-v0', on_linux=on_linux)
     env = TimeLimit(env, max_episode_steps=max_episode_length)
     obs = env.reset()
     # TODO: DDPG AC + HER
@@ -24,7 +26,7 @@ if __name__ == '__main__':
         model = DDPG(policy="MultiInputPolicy",
                      env=env,
                      replay_buffer_class=HerReplayBuffer,
-                     buffer_size=150000,
+                     buffer_size=buffer_size,
                      learning_rate=lr,
                      replay_buffer_kwargs=dict(
                          n_sampled_goal=num_sampled_goals,
@@ -34,8 +36,20 @@ if __name__ == '__main__':
                      ),
                      verbose=1)
     else:
-        model = DDPG.load('saved_models/DDPG_HER_1kk_geom.zip',
-                          env=env)
+        """model = DDPG.load('saved_models/DDPG_HER_1kk_mujoco.zip',
+                          env=env)"""
+        model = DDPG(policy="MultiInputPolicy",
+                     env=env,
+                     replay_buffer_class=HerReplayBuffer,
+                     buffer_size=buffer_size,
+                     learning_rate=lr,
+                     replay_buffer_kwargs=dict(
+                         n_sampled_goal=num_sampled_goals,
+                         goal_selection_strategy=goal_selection_strategy,
+                         online_sampling=online_sampling,
+                         max_episode_length=max_episode_length,
+                     ),
+                     verbose=1)
     if train:
         model.learn(total_timesteps=total_timesteps)
         fname = datetime.now().strftime("%H_%M_%S")
@@ -43,7 +57,7 @@ if __name__ == '__main__':
             model.save("saved_models/{name}".format(name=model_name))
     else:
         env.test = True
-        for i in range(10):
+        for i in range(num_test_games):
             obs = env.reset()
             total_reward = 0.0
             done = False

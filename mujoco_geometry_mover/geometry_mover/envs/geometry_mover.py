@@ -1,11 +1,12 @@
 import numpy as np
+from copy import deepcopy
 from gym import utils
 from gym import spaces
 from gym.envs.mujoco import mujoco_env
 
 
 class GeometryMover(mujoco_env.MujocoEnv, utils.EzPickle):
-    def __init__(self, frame_skip=1, max_timesteps=100):
+    def __init__(self, frame_skip=1, max_timesteps=100, on_linux=False):
         utils.EzPickle.__init__(self)
         self.goal_state = [np.random.uniform(low=0.0, high=1.0), np.random.uniform(low=0.0, high=1.0)]
         self.camera_position = None
@@ -17,17 +18,20 @@ class GeometryMover(mujoco_env.MujocoEnv, utils.EzPickle):
             "desired_goal": spaces.Box(low=0.0, high=1.0, shape=(2,), dtype=np.float32),
             "achieved_goal": spaces.Box(low=0.0, high=1.0, shape=(2,), dtype=np.float32)
         })
-        """mujoco_env.MujocoEnv.__init__(self,
-                                      "/Users/federico/PycharmProjects/point_mover/mujoco_geometry_mover/geometry_mover/envs/geometry_mover.xml",
-                                      self.frame_skip)"""
-        # Linux version
-        mujoco_env.MujocoEnv.__init__(self,
-                                      "/home/federima/point_mover/mujoco_geometry_mover/geometry_mover/envs/geometry_mover.xml",
-                                      self.frame_skip)
+        self.on_linux = on_linux
+        if self.on_linux:
+            mujoco_env.MujocoEnv.__init__(self,
+                                          "/home/federima/point_mover/mujoco_geometry_mover/geometry_mover/envs/geometry_mover.xml",
+                                          self.frame_skip)
+        else:
+            mujoco_env.MujocoEnv.__init__(self,
+                                          "/Users/federico/PycharmProjects/point_mover/mujoco_geometry_mover/geometry_mover/envs/geometry_mover.xml",
+                                          self.frame_skip)
 
     def step(self, a):
         self.do_simulation(a, self.frame_skip)
         pos = self.get_body_com("pointer")[:3]
+        self.model.geom_pos[1] = -deepcopy(pos)
         self.camera_position = [pos[0], pos[2]]
         distance = (np.sqrt(np.power((self.camera_position[0] - self.goal_state[0]), 2) +
                             np.power((self.camera_position[1] - self.goal_state[1]), 2)))
@@ -49,12 +53,17 @@ class GeometryMover(mujoco_env.MujocoEnv, utils.EzPickle):
                 "desired_goal": np.array(self.goal_state)}
 
     def reset_model(self):
+        self.model.body_pos[1] = [np.random.uniform(low=0.0, high=1.0), 0.75, np.random.uniform(low=0.0, high=1.0)]
         pos = self.get_body_com("pointer")[:3]
         self.camera_position = [pos[0], pos[2]]
+        self.model.geom_pos[1] = -deepcopy(pos)
         self.goal_state = [np.random.uniform(low=0.0, high=1.0), np.random.uniform(low=0.0, high=1.0)]
         restart_position = [np.random.uniform(low=-1.0, high=1.0), np.random.uniform(low=-1.0, high=1.0)]
-        self.set_state(np.array([restart_position[0], 1, restart_position[1], 0, 0, 0, 0]),
-                       np.concatenate([self.goal_state, [0, 0, 0, 0]]))
+        # TODO: consider case of more than one object
+        self.model.body_pos[2] = [np.random.uniform(low=-2.0, high=2.0), 0, np.random.uniform(low=2.0, high=4.0)]
+        # self.model.body_quat[2] = [1, 0, np.random.randint(low=-90, high=90), 0]
+        self.set_state(np.array([restart_position[0], restart_position[1]]),
+                       np.array(self.goal_state))
         return self._get_obs()
 
     def viewer_setup(self):
