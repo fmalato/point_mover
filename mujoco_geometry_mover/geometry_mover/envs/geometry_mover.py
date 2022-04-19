@@ -37,9 +37,10 @@ class GeometryMover(mujoco_env.MujocoEnv, utils.EzPickle):
                             np.power((self.camera_position[1] - self.goal_state[1]), 2)))
         #cost = -1.0
         cost = -0.5*distance
-        if distance <= 0.01:
+        if distance <= 0.5:
             #cost = 0.0
             done = True
+            print("True!")
         else:
             done = False
 
