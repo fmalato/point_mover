@@ -11,11 +11,11 @@ if __name__ == '__main__':
     num_test_games = 10
     buffer_size = 150000
     lr = 1e-4
-    total_timesteps = 1000000
+    total_timesteps = 200000
     train = True
     save = True
     on_linux = True
-    model_name = "DDPG_HER_1kk_mujoco_2dof"
+    model_name = "DDPG_HER_200k_mujoco_2dof"
     goal_selection_strategy = 'future'
     env = gym.make('geometry_mover:geometry_mover-v0', on_linux=on_linux)
     env = TimeLimit(env, max_episode_steps=max_episode_length)
