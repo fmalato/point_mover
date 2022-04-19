@@ -27,7 +27,7 @@
       </body>
   </worldbody>
     <actuator>
-        <position ctrllimited="true" forcelimited="true" forcerange="-0.1 0.1" ctrlrange="-0.1 0.1" joint="pointer:jointx" kp="3" name="pointer:jointx" user="1"/>
-        <position ctrllimited="true" forcelimited="true" forcerange="-0.1 0.1" ctrlrange="-0.1 0.1" joint="pointer:jointz" kp="3" name="pointer:jointz" user="1"/>
+        <position ctrllimited="true" forcelimited="true" forcerange="-0.1 0.1" ctrlrange="-0.1 0.1" joint="pointer:jointx" kp="0.3" name="pointer:jointx" user="1"/>
+        <position ctrllimited="true" forcelimited="true" forcerange="-0.1 0.1" ctrlrange="-0.1 0.1" joint="pointer:jointz" kp="0.3" name="pointer:jointz" user="1"/>
     </actuator>
 </mujoco>
