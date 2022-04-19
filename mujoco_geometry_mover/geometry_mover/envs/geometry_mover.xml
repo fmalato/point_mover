@@ -18,8 +18,8 @@
       <geom conaffinity="1" condim="3" material="MatPlane" name="floor" pos="0 0 0" rgba="0.8 0.9 0.8 1" size="40 40 40" type="plane"/>
       <body name="pointer" pos="0 1 0">
           <geom name="pointer_dot" size="0.05 0.05 0.05" rgba="0 0 1 1" pos="0 1 0" type="sphere"/>
-          <joint name="pointer:jointx" type="hinge" damping="0.01" pos="0 -5 1" axis="1 0 0"/>
-          <joint name="pointer:jointz" type="hinge" damping="0.01" pos="0 -5 1" axis="0 0 1"/>
+          <joint name="pointer:jointx" type="hinge" damping="0.01" pos="0 -5 1" axis="1 0 0" limited="true" range="0 25"/>
+          <joint name="pointer:jointz" type="hinge" damping="0.01" pos="0 -5 1" axis="0 0 1" limited="true" range="-20 20"/>
       </body>
         <camera name="cam" mode="targetbody" target="pointer" pos="0 -5 1"/>
       <body name="rod" pos="0 0 2.0">
