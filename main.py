@@ -12,9 +12,9 @@ if __name__ == '__main__':
     buffer_size = 150000
     lr = 1e-4
     total_timesteps = 1000000
-    train = False
-    save = False
-    on_linux = False
+    train = True
+    save = True
+    on_linux = True
     model_name = "DDPG_HER_1kk_mujoco_2dof"
     goal_selection_strategy = 'future'
     env = gym.make('geometry_mover:geometry_mover-v0', on_linux=on_linux)
