@@ -29,10 +29,15 @@ class GeometryMover(mujoco_env.MujocoEnv, utils.EzPickle):
                                           self.frame_skip)
 
     def step(self, a):
+        new_pos = self.sim.data.get_body_xpos('pointer')
+        new_pos = new_pos + np.array([a[0], 1, a[1]])
+        self.sim.data.body_xpos[1] = new_pos
+        self.sim.data.geom_xpos[1] = new_pos
+        self.sim.forward()
         self.do_simulation(a, self.frame_skip)
-        pos = self.get_body_com("pointer")[:3]
+        #pos = self.get_body_com("pointer")[:3]
         #self.model.geom_pos[1] = -deepcopy(pos)
-        self.camera_position = [pos[0], pos[2]]
+        self.camera_position = [new_pos[0], new_pos[2]]
         distance = (np.sqrt(np.power((self.camera_position[0] - self.goal_state[0]), 2) +
                             np.power((self.camera_position[1] - self.goal_state[1]), 2)))
         cost = -1.0
