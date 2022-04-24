@@ -13,6 +13,7 @@ class GeometryMover(mujoco_env.MujocoEnv, utils.EzPickle):
         self.step_count = 0
         self.max_timesteps = max_timesteps
         self.frame_skip = frame_skip
+        self.xvel = None
         self.observation_space = spaces.Dict({
             "observation": spaces.Box(low=0.0, high=1.0, shape=(4,), dtype=np.float32),
             "desired_goal": spaces.Box(low=0.0, high=1.0, shape=(2,), dtype=np.float32),
@@ -29,18 +30,19 @@ class GeometryMover(mujoco_env.MujocoEnv, utils.EzPickle):
                                           self.frame_skip)
 
     def step(self, a):
-        new_pos = self.sim.data.get_body_xpos('pointer')
-        s_i = self.sim.get_state()
-        self.sim.set_state_from_flattened(np.array([s_i.time + 0.002, a[0], a[1], 0, 0, 0, 0]))
-        s_f = self.sim.get_state()
+        old_xpos = self.sim.data.get_body_xpos('pointer').copy()
+        """new_state = np.concatenate([[s_i.time + 0.002], s_i.qpos, s_i.qvel, a], axis=0)
+        self.sim.set_state_from_flattened(new_state)"""
         #new_pos = new_pos + np.array([a[0], 0, a[1]])
         #self.sim.data.body_xpos[1] += np.array([a[0], 0, a[1]])
         #self.sim.data.geom_xpos[1] += np.array([a[0], 0, a[1]])
-        self.sim.forward()
-        #self.do_simulation(a, self.frame_skip)
+        #self.sim.forward()
+        self.do_simulation(a, self.frame_skip)
+        new_xpos = self.sim.data.get_body_xpos('pointer').copy()
+        self.xvel = new_xpos - old_xpos
         #pos = self.get_body_com("pointer")[:3]
         #self.model.geom_pos[1] = -deepcopy(pos)
-        self.camera_position = [new_pos[0], new_pos[2]]
+        self.camera_position = [new_xpos[0], new_xpos[2]]
         distance = (np.sqrt(np.power((self.camera_position[0] - self.goal_state[0]), 2) +
                             np.power((self.camera_position[1] - self.goal_state[1]), 2)))
         cost = -1.0
@@ -65,6 +67,7 @@ class GeometryMover(mujoco_env.MujocoEnv, utils.EzPickle):
         #self.model.body_pos[1] = [np.random.uniform(low=0.0, high=1.0), 0.75, np.random.uniform(low=0.0, high=1.0)]
         pos = self.get_body_com("pointer")[:3]
         self.camera_position = [pos[0], pos[2]]
+        self.xvel = [0.0, 0.0]
         #self.model.geom_pos[1] = -deepcopy(pos)
         self.goal_state = [np.random.uniform(low=0.0, high=1.0), np.random.uniform(low=0.0, high=1.0)]
         restart_position = [np.random.uniform(low=-1.0, high=1.0), np.random.uniform(low=-1.0, high=1.0)]
