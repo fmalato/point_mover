@@ -30,11 +30,14 @@ class GeometryMover(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def step(self, a):
         new_pos = self.sim.data.get_body_xpos('pointer')
-        new_pos = new_pos + np.array([a[0], 1, a[1]])
-        self.sim.data.body_xpos[1] = new_pos
-        self.sim.data.geom_xpos[1] = new_pos
+        s_i = self.sim.get_state()
+        self.sim.set_state_from_flattened(np.array([s_i.time + 0.002, a[0], a[1], 0, 0, 0, 0]))
+        s_f = self.sim.get_state()
+        #new_pos = new_pos + np.array([a[0], 0, a[1]])
+        #self.sim.data.body_xpos[1] += np.array([a[0], 0, a[1]])
+        #self.sim.data.geom_xpos[1] += np.array([a[0], 0, a[1]])
         self.sim.forward()
-        self.do_simulation(a, self.frame_skip)
+        #self.do_simulation(a, self.frame_skip)
         #pos = self.get_body_com("pointer")[:3]
         #self.model.geom_pos[1] = -deepcopy(pos)
         self.camera_position = [new_pos[0], new_pos[2]]
@@ -68,8 +71,8 @@ class GeometryMover(mujoco_env.MujocoEnv, utils.EzPickle):
         # TODO: consider case of more than one object
         self.model.body_pos[2] = [np.random.uniform(low=-2.0, high=2.0), 0, np.random.uniform(low=2.0, high=4.0)]
         # self.model.body_quat[2] = [1, 0, np.random.randint(low=-90, high=90), 0]
-        self.set_state(np.array([restart_position[0], restart_position[1]]),
-                       np.array(self.goal_state))
+        """self.set_state(np.array([restart_position[0], restart_position[1]]),
+                       np.array(self.goal_state))"""
         return self._get_obs()
 
     def viewer_setup(self):
@@ -81,7 +84,7 @@ class GeometryMover(mujoco_env.MujocoEnv, utils.EzPickle):
     def compute_reward(self, achieved_goal, desired_goal, info):
         rewards = np.zeros(shape=(len(achieved_goal,)))
         for a, d, i in zip(achieved_goal, desired_goal, range(len(achieved_goal))):
-            if self._distance(a, d) <= 0.01:
+            if self._distance(a, d) <= 0.05:
                 rewards[i] = 0.0
             else:
                 rewards[i] = -1.0
