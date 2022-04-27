@@ -11,10 +11,10 @@ if __name__ == '__main__':
     num_test_games = 10
     buffer_size = 150000
     lr = 1e-4
-    total_timesteps = 200000
-    train = False
-    save = False
-    on_linux = False
+    total_timesteps = 1000000
+    train = True
+    save = True
+    on_linux = True
     model_name = "DDPG_HER_1kk_mujoco_2dof"
     goal_selection_strategy = 'future'
     env = gym.make('geometry_mover:geometry_mover-v0', on_linux=on_linux)
