@@ -1,4 +1,5 @@
 import gym
+import numpy as np
 from gym.wrappers import TimeLimit
 from datetime import datetime
 from stable_baselines3 import DDPG, HerReplayBuffer
@@ -36,9 +37,9 @@ if __name__ == '__main__':
                      ),
                      verbose=1)
     else:
-        model = DDPG.load('saved_models/DDPG_HER_200k_mujoco_2dof.zip',
-                          env=env)
-        """model = DDPG(policy="MultiInputPolicy",
+        """model = DDPG.load('saved_models/DDPG_HER_200k_mujoco_2dof.zip',
+                          env=env)"""
+        model = DDPG(policy="MultiInputPolicy",
                      env=env,
                      replay_buffer_class=HerReplayBuffer,
                      buffer_size=buffer_size,
@@ -49,7 +50,7 @@ if __name__ == '__main__':
                          online_sampling=online_sampling,
                          max_episode_length=max_episode_length,
                      ),
-                     verbose=1)"""
+                     verbose=1)
     if train:
         model.learn(total_timesteps=total_timesteps)
         fname = datetime.now().strftime("%H_%M_%S")
@@ -57,6 +58,9 @@ if __name__ == '__main__':
             model.save("saved_models/{name}".format(name=model_name))
     else:
         env.test = True
+        ctrl_up = [[0, 0.001] for x in range(2000)]
+        ctrl_left = [[0.001, 0] for x in range(2000)]
+        ctrls = np.concatenate([ctrl_up, ctrl_left])
         for i in range(num_test_games):
             obs = env.reset()
             total_reward = 0.0
@@ -64,9 +68,14 @@ if __name__ == '__main__':
             num_steps = 0
             print('########## Episode {i} ##########'.format(i=i+1))
             print('Initial position: {x}'.format(x=obs['observation']))
-            while not done:
+            """while not done:
                 action, _states = model.predict(obs)
                 obs, rewards, done, info = env.step(action)
+                total_reward += rewards
+                num_steps += 1
+                env.render()"""
+            for x, a in enumerate(ctrls):
+                obs, rewards, done, info = env.step(a)
                 total_reward += rewards
                 num_steps += 1
                 env.render()

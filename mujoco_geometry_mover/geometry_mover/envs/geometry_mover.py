@@ -19,6 +19,7 @@ class GeometryMover(mujoco_env.MujocoEnv, utils.EzPickle):
             "desired_goal": spaces.Box(low=0.0, high=1.0, shape=(2,), dtype=np.float32),
             "achieved_goal": spaces.Box(low=0.0, high=1.0, shape=(2,), dtype=np.float32)
         })
+        self.action_space = spaces.Box(low=-0.005, high=0.005, shape=(2,), dtype=np.float32)
         self.on_linux = on_linux
         if self.on_linux:
             mujoco_env.MujocoEnv.__init__(self,
@@ -30,14 +31,12 @@ class GeometryMover(mujoco_env.MujocoEnv, utils.EzPickle):
                                           self.frame_skip)
 
     def step(self, a):
-        old_xpos = self.sim.data.get_body_xpos('pointer').copy()
-        """new_state = np.concatenate([[s_i.time + 0.002], s_i.qpos, s_i.qvel, a], axis=0)
-        self.sim.set_state_from_flattened(new_state)"""
-        #new_pos = new_pos + np.array([a[0], 0, a[1]])
-        #self.sim.data.body_xpos[1] += np.array([a[0], 0, a[1]])
-        #self.sim.data.geom_xpos[1] += np.array([a[0], 0, a[1]])
-        #self.sim.forward()
-        self.do_simulation(a, self.frame_skip)
+        old_xpos = self.data.get_body_xpos('pointer').copy()
+        new_pos = old_xpos + np.array([a[0], 0, a[1]])
+        self.model.body_pos[1] = new_pos
+        #self.model.geom_pos[0] = new_pos
+        self.sim.step()
+        #self.do_simulation(a, self.frame_skip)
         new_xpos = self.sim.data.get_body_xpos('pointer').copy()
         self.xvel = new_xpos - old_xpos
         #pos = self.get_body_com("pointer")[:3]
