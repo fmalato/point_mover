@@ -9,7 +9,7 @@ from stable_baselines3 import DDPG, HerReplayBuffer
 if __name__ == '__main__':
     max_episode_length = 1000
     online_sampling = True
-    num_sampled_goals = 150
+    num_sampled_goals = 20
     num_test_games = 20
     buffer_size = 150000
     lr = 1e-4
@@ -76,10 +76,13 @@ if __name__ == '__main__':
                 num_steps += 1"""
                 #env.render()
             for x, a in enumerate(ctrls):
-                obs, rewards, done, info = env.step(a)
-                total_reward += rewards
-                num_steps += 1
-                #env.render()
+                if not done:
+                    obs, rewards, done, info = env.step(a)
+                    total_reward += rewards
+                    num_steps += 1
+                    #env.render()
+                else:
+                    break
             print('Final position: {x}'.format(x=obs['observation']))
             print('Episode reward: {r} - Number of steps: {s}'.format(r=total_reward, s=num_steps))
     p.disconnect(env.env.connection)

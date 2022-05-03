@@ -20,7 +20,7 @@ class BulletGeometryMover(gym.Env):
             "desired_goal": spaces.Box(low=0.0, high=1.0, shape=(2,), dtype=np.float32),
             "achieved_goal": spaces.Box(low=0.0, high=1.0, shape=(2,), dtype=np.float32)
         })
-        self.action_space = spaces.Box(low=-0.005, high=0.005, shape=(2,), dtype=np.float32)
+        self.action_space = spaces.Box(low=-0.1, high=0.1, shape=(2,), dtype=np.float32)
         self.on_linux = on_linux
         if not self.on_linux:
             self.connection = p.connect(p.GUI)
@@ -64,7 +64,8 @@ class BulletGeometryMover(gym.Env):
 
     def reset(self):
         # Reset rod position
-        rod_pos = [np.random.uniform(low=-2.0, high=2.0), 0, np.random.uniform(low=1.0, high=3.0)]
+        #rod_pos = [np.random.uniform(low=-2.0, high=2.0), 0, np.random.uniform(low=1.0, high=3.0)]
+        rod_pos = [2, 0, 3]
         p.resetBasePositionAndOrientation(self.boxId[1], rod_pos, [0, 0, 0, 1])
         self.goal_state = [rod_pos[0], rod_pos[2]]
         # Reset pointer position
