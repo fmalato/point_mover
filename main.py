@@ -1,5 +1,6 @@
 import gym
 import numpy as np
+import pybullet as p
 from gym.wrappers import TimeLimit
 from datetime import datetime
 from stable_baselines3 import DDPG, HerReplayBuffer
@@ -9,16 +10,16 @@ if __name__ == '__main__':
     max_episode_length = 1000
     online_sampling = True
     num_sampled_goals = 150
-    num_test_games = 10
+    num_test_games = 20
     buffer_size = 150000
     lr = 1e-4
-    total_timesteps = 1000000
+    total_timesteps = 200000
     train = True
     save = True
     on_linux = True
-    model_name = "DDPG_HER_1kk_mujoco_2dof"
+    model_name = "DDPG_HER_200k_bullet_2dof"
     goal_selection_strategy = 'future'
-    env = gym.make('geometry_mover:geometry_mover-v0', on_linux=on_linux)
+    env = gym.make('bullet_geometry_mover:GeometryMover-v0', max_timesteps=max_episode_length, on_linux=on_linux)
     env = TimeLimit(env, max_episode_steps=max_episode_length)
     obs = env.reset()
     # TODO: DDPG AC + HER
@@ -58,8 +59,8 @@ if __name__ == '__main__':
             model.save("saved_models/{name}".format(name=model_name))
     else:
         env.test = True
-        ctrl_up = [[0, 0.001] for x in range(2000)]
-        ctrl_left = [[0.001, 0] for x in range(2000)]
+        ctrl_up = [[0, 0.1] for x in range(100)]
+        ctrl_left = [[0.1, 0] for x in range(100)]
         ctrls = np.concatenate([ctrl_up, ctrl_left])
         for i in range(num_test_games):
             obs = env.reset()
@@ -72,12 +73,13 @@ if __name__ == '__main__':
                 action, _states = model.predict(obs)
                 obs, rewards, done, info = env.step(action)
                 total_reward += rewards
-                num_steps += 1
-                env.render()"""
+                num_steps += 1"""
+                #env.render()
             for x, a in enumerate(ctrls):
                 obs, rewards, done, info = env.step(a)
                 total_reward += rewards
                 num_steps += 1
-                env.render()
+                #env.render()
             print('Final position: {x}'.format(x=obs['observation']))
             print('Episode reward: {r} - Number of steps: {s}'.format(r=total_reward, s=num_steps))
+    p.disconnect(env.env.connection)
