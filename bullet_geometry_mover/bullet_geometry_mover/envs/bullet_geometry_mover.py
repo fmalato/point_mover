@@ -64,8 +64,8 @@ class BulletGeometryMover(gym.Env):
 
     def reset(self):
         # Reset rod position
-        #rod_pos = [np.random.uniform(low=-2.0, high=2.0), 0, np.random.uniform(low=1.0, high=3.0)]
-        rod_pos = [2, 0, 3]
+        rod_pos = [np.random.uniform(low=-2.0, high=2.0), 0, np.random.uniform(low=1.0, high=3.0)]
+        #rod_pos = [2, 0, 3]
         p.resetBasePositionAndOrientation(self.boxId[1], rod_pos, [0, 0, 0, 1])
         self.goal_state = [rod_pos[0], rod_pos[2]]
         # Reset pointer position
