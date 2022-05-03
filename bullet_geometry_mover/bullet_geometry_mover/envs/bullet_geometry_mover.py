@@ -16,9 +16,9 @@ class BulletGeometryMover(gym.Env):
         self.max_timesteps = max_timesteps
         self.frame_skip = frame_skip
         self.observation_space = spaces.Dict({
-            "observation": spaces.Box(low=0.0, high=1.0, shape=(4,), dtype=np.float32),
-            "desired_goal": spaces.Box(low=0.0, high=1.0, shape=(2,), dtype=np.float32),
-            "achieved_goal": spaces.Box(low=0.0, high=1.0, shape=(2,), dtype=np.float32)
+            "observation": spaces.Box(low=-3.0, high=3.0, shape=(4,), dtype=np.float32),
+            "desired_goal": spaces.Box(low=-3.0, high=3.0, shape=(2,), dtype=np.float32),
+            "achieved_goal": spaces.Box(low=-3.0, high=3.0, shape=(2,), dtype=np.float32)
         })
         self.action_space = spaces.Box(low=-0.1, high=0.1, shape=(2,), dtype=np.float32)
         self.on_linux = on_linux
@@ -43,7 +43,7 @@ class BulletGeometryMover(gym.Env):
         time.sleep(1. / 240.)
         cost = -1.0
         #cost = -0.02 * distance
-        if distance <= 0.01:
+        if distance <= 0.05:
             cost = 0.0
             done = True
         else:
