@@ -73,6 +73,8 @@ class BulletGeometryMover(gym.Env):
         self.camera_position = [restart_position[0], restart_position[2]]
         # Reset camera position
         p.resetDebugVisualizerCamera(self.camera_distance, 0, 0, [restart_position[0], 0, restart_position[2]])
+        # Reset step count
+        self.step_count = 0
 
         return self._get_obs()
 
