@@ -41,10 +41,10 @@ class BulletGeometryMover(gym.Env):
                             np.power((self.camera_position[1] - self.goal_state[1]), 2)))
         p.stepSimulation()
         time.sleep(1. / 240.)
-        cost = -1.0
-        #cost = -0.02 * distance
+        #cost = -1.0
+        cost = -0.02 * distance
         if distance <= 0.05:
-            cost = 0.0
+            #cost = 0.0
             done = True
         else:
             done = False
