@@ -9,7 +9,7 @@ from stable_baselines3 import DDPG, HerReplayBuffer
 if __name__ == '__main__':
     max_episode_length = 1000
     online_sampling = True
-    num_sampled_goals = 20
+    num_sampled_goals = 3
     num_test_games = 20
     buffer_size = 150000
     lr = 1e-4
