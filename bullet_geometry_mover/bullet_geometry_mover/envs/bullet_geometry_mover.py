@@ -97,9 +97,9 @@ class BulletGeometryMover(gym.Env):
     def compute_reward(self, achieved_goal, desired_goal, info):
         rewards = np.zeros(shape=(len(achieved_goal,)))
         for a, d, i in zip(achieved_goal, desired_goal, range(len(achieved_goal))):
-            if self._distance(a, d) <= 0.05:
-                rewards[i] = 0.0
+            if self._distance(a, d) <= 0.1:
+                rewards[i] = 1.0
             else:
-                rewards[i] = -1.0
+                rewards[i] = 0.0
 
         return rewards
