@@ -20,8 +20,7 @@ class BulletGeometryMover(gym.Env):
             "desired_goal": spaces.Box(low=-3.0, high=3.0, shape=(2,), dtype=np.float32),
             "achieved_goal": spaces.Box(low=-3.0, high=3.0, shape=(2,), dtype=np.float32)
         })
-        #self.action_space = spaces.Box(low=-0.1, high=0.1, shape=(2,), dtype=np.float32)
-        self.action_space = spaces.Box(low=0.0, high=3.0, shape=(1,), dtype=np.int8)
+        self.action_space = spaces.Box(low=-0.1, high=0.1, shape=(2,), dtype=np.float32)
         self.on_linux = on_linux
         if not self.on_linux:
             self.connection = p.connect(p.GUI)
@@ -32,24 +31,24 @@ class BulletGeometryMover(gym.Env):
 
     def step(self, a):
         pointerPos, pointerOrn = p.getBasePositionAndOrientation(self.boxId[0])
-        """new_pointer_pos = [np.clip(pointerPos[0] + a[0], -2.0, 2.0),
+        new_pointer_pos = [np.clip(pointerPos[0] + a[0], -2.0, 2.0),
                            pointerPos[1] + 0,
-                           np.clip(pointerPos[2] + a[1], 0.0, 3.0)]"""
-        if a == 0:
+                           np.clip(pointerPos[2] + a[1], 0.0, 3.0)]
+        """if int(a) == 0:
             new_pointer_pos = [np.clip(pointerPos[0] + 0.1, -2.0, 2.0), pointerPos[1], pointerPos[2]]
-        elif a == 1:
+        elif int(a) == 1:
             new_pointer_pos = [np.clip(pointerPos[0] - 0.1, -2.0, 2.0), pointerPos[1], pointerPos[2]]
-        elif a == 2:
+        elif int(a) == 2:
             new_pointer_pos = [pointerPos[0], pointerPos[1], np.clip(pointerPos[2] + 0.1, 0.0, 3.0)]
-        else:
-            new_pointer_pos = [pointerPos[0], pointerPos[1], np.clip(pointerPos[2] - 0.1, 0.0, 3.0)]
+        elif int(a) == 3:
+            new_pointer_pos = [pointerPos[0], pointerPos[1], np.clip(pointerPos[2] - 0.1, 0.0, 3.0)]"""
         p.resetBasePositionAndOrientation(self.boxId[0], new_pointer_pos, pointerOrn)
         p.resetDebugVisualizerCamera(self.camera_distance, 0, 0, new_pointer_pos)
         self.camera_position = [new_pointer_pos[0], new_pointer_pos[2]]
         distance = (np.sqrt(np.power((self.camera_position[0] - self.goal_state[0]), 2) +
                             np.power((self.camera_position[1] - self.goal_state[1]), 2)))
         p.stepSimulation()
-        time.sleep(1. / 240.)
+        #time.sleep(1. / 240.)
         cost = 0.0
         #cost = -0.02 * distance
         if distance <= 0.1:
@@ -62,8 +61,8 @@ class BulletGeometryMover(gym.Env):
         self.step_count += 1
         if self.step_count > self.max_timesteps:
             done = True
-        if (new_pointer_pos[0] == 2.0 or new_pointer_pos[0] == -2.0) or new_pointer_pos[2] == 3.0 or new_pointer_pos[2] == 0.0:
-            done = True
+        """if (new_pointer_pos[0] == 2.0 or new_pointer_pos[0] == -2.0) or new_pointer_pos[2] == 3.0 or new_pointer_pos[2] == 0.0:
+            done = True"""
 
         obs = self._get_obs()
 
