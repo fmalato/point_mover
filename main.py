@@ -7,17 +7,17 @@ from stable_baselines3 import DDPG, HerReplayBuffer
 
 
 if __name__ == '__main__':
-    max_episode_length = 1000
+    max_episode_length = 5000
     online_sampling = True
-    num_sampled_goals = 3
+    num_sampled_goals = 10
     num_test_games = 20
     buffer_size = 150000
     lr = 1e-4
-    total_timesteps = 200000
+    total_timesteps = 1000000
     train = True
     save = True
     on_linux = True
-    model_name = "DDPG_HER_200k_bullet_2dof"
+    model_name = "DDPG_HER_1kk_bullet_2dof"
     goal_selection_strategy = 'future'
     env = gym.make('bullet_geometry_mover:GeometryMover-v0', max_timesteps=max_episode_length, on_linux=on_linux)
     env = TimeLimit(env, max_episode_steps=max_episode_length)
