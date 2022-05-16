@@ -9,7 +9,7 @@ from gym import spaces
 
 class BulletGeometryMover(gym.Env):
 
-    def __init__(self, max_timesteps, frame_skip=1, camera_distance=5, on_linux=False):
+    def __init__(self, max_timesteps, frame_skip=1, camera_distance=5, on_linux=False, limit_fps=False):
         self.goal_state = [np.random.uniform(low=0.0, high=1.0), np.random.uniform(low=0.0, high=1.0)]
         self.camera_position = None
         self.step_count = 0
@@ -26,35 +26,29 @@ class BulletGeometryMover(gym.Env):
             self.connection = p.connect(p.GUI)
         else:
             self.connection = p.connect(p.DIRECT)
+        self.limit_fps = limit_fps
         self.boxId = p.loadMJCF("bullet_geometry_mover/bullet_geometry_mover/envs/bullet_geometry_mover.xml")
         self.camera_distance = camera_distance
 
     def step(self, a):
         pointerPos, pointerOrn = p.getBasePositionAndOrientation(self.boxId[0])
         new_pointer_pos = [np.clip(pointerPos[0] + a[0], -2.0, 2.0),
-                           pointerPos[1] + 0,
+                           pointerPos[1],
                            np.clip(pointerPos[2] + a[1], 0.0, 3.0)]
-        """if int(a) == 0:
-            new_pointer_pos = [np.clip(pointerPos[0] + 0.1, -2.0, 2.0), pointerPos[1], pointerPos[2]]
-        elif int(a) == 1:
-            new_pointer_pos = [np.clip(pointerPos[0] - 0.1, -2.0, 2.0), pointerPos[1], pointerPos[2]]
-        elif int(a) == 2:
-            new_pointer_pos = [pointerPos[0], pointerPos[1], np.clip(pointerPos[2] + 0.1, 0.0, 3.0)]
-        elif int(a) == 3:
-            new_pointer_pos = [pointerPos[0], pointerPos[1], np.clip(pointerPos[2] - 0.1, 0.0, 3.0)]"""
+
         p.resetBasePositionAndOrientation(self.boxId[0], new_pointer_pos, pointerOrn)
         p.resetDebugVisualizerCamera(self.camera_distance, 0, 0, new_pointer_pos)
         self.camera_position = [new_pointer_pos[0], new_pointer_pos[2]]
         distance = (np.sqrt(np.power((self.camera_position[0] - self.goal_state[0]), 2) +
                             np.power((self.camera_position[1] - self.goal_state[1]), 2)))
         p.stepSimulation()
-        #time.sleep(1. / 240.)
+        if self.limit_fps:
+            time.sleep(1. / 240.)
         cost = 0.0
         #cost = -0.02 * distance
         if distance <= 0.1:
             cost = 1.0
             done = True
-            print(distance)
         else:
             done = False
 
