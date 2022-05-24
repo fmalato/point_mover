@@ -8,9 +8,9 @@ from stable_baselines3.common.noise import NormalActionNoise
 
 
 if __name__ == '__main__':
-    max_episode_length = 5000
+    max_episode_length = 1000
     online_sampling = True
-    num_sampled_goals = 2
+    num_sampled_goals = 200
     num_test_games = 20
     buffer_size = 150000
     lr = 1e-4
@@ -19,13 +19,14 @@ if __name__ == '__main__':
     save = True
     on_linux = True
     if train:
-        limit_fps = False
+        limit_fps = True
     else:
         limit_fps = True
     model_name = "DDPG_HER_1kk_bullet_2dof"
     goal_selection_strategy = 'future'
     env = gym.make('bullet_geometry_mover:GeometryMover-v0', max_timesteps=max_episode_length, on_linux=on_linux,
                    limit_fps=limit_fps)
+    """env = gym.make('point_mover:point_mover-v0', max_timesteps=max_episode_length)"""
     env = TimeLimit(env, max_episode_steps=max_episode_length)
     obs = env.reset()
     # TODO: DDPG AC + HER
@@ -36,6 +37,9 @@ if __name__ == '__main__':
         Is it possible that there are slow movements at the beginning for some reason, 
         and then using HER reinforces choosing small movements over big leaps?
         Still, why should it move only on one direction?"""
+        """
+        action_noise=NormalActionNoise(mean=0, sigma=1)
+        """
         model = DDPG(policy="MultiInputPolicy",
                      env=env,
                      replay_buffer_class=HerReplayBuffer,
@@ -49,7 +53,7 @@ if __name__ == '__main__':
                      ),
                      verbose=1,
                      device="cuda",
-                     learning_starts=5000)
+                     learning_starts=4000)
     else:
         """model = DDPG.load('saved_models/DDPG_HER_1kk_bullet_2dof.zip',
                           env=env)"""
@@ -84,6 +88,7 @@ if __name__ == '__main__':
             print('Initial position: {x}'.format(x=obs['observation']))
             while not done:
                 action, _states = model.predict(obs)
+                # Override actions with random ones
                 action = [np.random.uniform(-0.5, 0.5), np.random.uniform(-0.5, 0.5)]
                 obs, rewards, done, info = env.step(action)
                 total_reward += rewards
