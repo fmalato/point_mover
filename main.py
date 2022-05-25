@@ -5,6 +5,7 @@ from gym.wrappers import TimeLimit
 from datetime import datetime
 from stable_baselines3 import DDPG, HerReplayBuffer
 from stable_baselines3.common.noise import NormalActionNoise
+from utils import ValuesCallback
 
 
 if __name__ == '__main__':
@@ -53,7 +54,8 @@ if __name__ == '__main__':
                      ),
                      verbose=1,
                      device="cuda",
-                     learning_starts=4000)
+                     learning_starts=0,
+                     batch_size=1500)
     else:
         """model = DDPG.load('saved_models/DDPG_HER_1kk_bullet_2dof.zip',
                           env=env)"""
@@ -70,7 +72,8 @@ if __name__ == '__main__':
                      ),
                      verbose=1)
     if train:
-        model.learn(total_timesteps=total_timesteps)
+        callback = ValuesCallback(verbose=0)
+        model.learn(total_timesteps=total_timesteps, callback=callback)
         fname = datetime.now().strftime("%H_%M_%S")
         if save:
             model.save("saved_models/{name}".format(name=model_name))
