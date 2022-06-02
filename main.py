@@ -16,7 +16,7 @@ if __name__ == '__main__':
     num_sampled_goals = 4
     num_test_games = 20
     buffer_size = 150000
-    lr = 1e-4
+    lr = 1e-3
     total_timesteps = 500000
     train = True
     save = True
