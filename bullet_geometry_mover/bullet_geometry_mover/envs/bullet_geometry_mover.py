@@ -10,6 +10,7 @@ from gym import spaces
 class BulletGeometryMover(gym.Env):
 
     def __init__(self, max_timesteps, frame_skip=1, camera_distance=5, on_linux=False, limit_fps=False):
+        super().__init__(self)
         self.goal_state = [np.random.uniform(low=0.0, high=1.0), np.random.uniform(low=0.0, high=1.0)]
         self.camera_position = None
         self.step_count = 0
@@ -29,8 +30,15 @@ class BulletGeometryMover(gym.Env):
         self.limit_fps = limit_fps
         self.boxId = p.loadMJCF("bullet_geometry_mover/bullet_geometry_mover/envs/bullet_geometry_mover.xml")
         self.camera_distance = camera_distance
+        # Debugging variables
+        self.last_action = None
+        self.last_distance = None
+        self.current_obs = None
+        self.num_envs = 1
 
     def step(self, a):
+        # For debugging purposes
+        self.last_action = a
         pointerPos, pointerOrn = p.getBasePositionAndOrientation(self.boxId[0])
         new_pointer_pos = [np.clip(pointerPos[0] + a[0], -2.0, 2.0),
                            pointerPos[1],
@@ -45,6 +53,8 @@ class BulletGeometryMover(gym.Env):
         # self.camera_position = [new_pointer_pos[0], new_pointer_pos[2]]
         distance = (np.sqrt(np.power((self.camera_position[0] - self.goal_state[0]), 2) +
                             np.power((self.camera_position[1] - self.goal_state[1]), 2)))
+        # For debugging purposes
+        self.last_distance = distance
         p.stepSimulation()
         if self.limit_fps:
             time.sleep(1. / 240.)
@@ -63,6 +73,7 @@ class BulletGeometryMover(gym.Env):
             done = True"""
 
         obs = self._get_obs()
+        self.current_obs = obs
 
         return obs, cost, done, {}
 

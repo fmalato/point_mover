@@ -1,33 +1,36 @@
 import gym
+import torch
 import numpy as np
 import pybullet as p
 from gym.wrappers import TimeLimit
 from datetime import datetime
 from stable_baselines3 import DDPG, HerReplayBuffer
 from stable_baselines3.common.noise import NormalActionNoise
-from utils import ValuesCallback
+from stable_baselines3.common.vec_env import VecFrameStack
+from utils import ValuesCallback, TensorboardCallback
 
 
 if __name__ == '__main__':
     max_episode_length = 1000
     online_sampling = True
-    num_sampled_goals = 200
+    num_sampled_goals = 4
     num_test_games = 20
     buffer_size = 150000
     lr = 1e-4
-    total_timesteps = 1000000
+    total_timesteps = 500000
     train = True
     save = True
     on_linux = True
+    tb_log_name = "500k_3D"
     if train:
-        limit_fps = True
+        limit_fps = False
     else:
         limit_fps = True
-    model_name = "DDPG_HER_1kk_bullet_2dof"
+    model_name = "DDPG_HER_500k_3D_2dof"
     goal_selection_strategy = 'future'
     env = gym.make('bullet_geometry_mover:GeometryMover-v0', max_timesteps=max_episode_length, on_linux=on_linux,
-                   limit_fps=limit_fps)
-    """env = gym.make('point_mover:point_mover-v0', max_timesteps=max_episode_length)"""
+                   limit_fps=limit_fps, frame_skip=10)
+    #env = gym.make('point_mover:point_mover-v0', max_timesteps=max_episode_length)
     env = TimeLimit(env, max_episode_steps=max_episode_length)
     obs = env.reset()
     # TODO: DDPG AC + HER
@@ -55,7 +58,8 @@ if __name__ == '__main__':
                      verbose=1,
                      device="cuda",
                      learning_starts=0,
-                     batch_size=1500)
+                     batch_size=100,
+                     tensorboard_log='tensorboard_logs/')
     else:
         """model = DDPG.load('saved_models/DDPG_HER_1kk_bullet_2dof.zip',
                           env=env)"""
@@ -72,8 +76,8 @@ if __name__ == '__main__':
                      ),
                      verbose=1)
     if train:
-        callback = ValuesCallback(verbose=0)
-        model.learn(total_timesteps=total_timesteps, callback=callback)
+        callback = TensorboardCallback(verbose=0)
+        model.learn(total_timesteps=total_timesteps, callback=callback, tb_log_name=tb_log_name)
         fname = datetime.now().strftime("%H_%M_%S")
         if save:
             model.save("saved_models/{name}".format(name=model_name))

@@ -1,3 +1,4 @@
+import torch
 from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.ddpg import DDPG
 
@@ -23,4 +24,35 @@ class ValuesCallback(BaseCallback):
         pass
 
     def _on_training_end(self) -> None:
-        print(self.values)
+        pass
+
+
+class TensorboardCallback(BaseCallback):
+
+    def __init__(self, verbose):
+        super().__init__(verbose=verbose)
+        self.values = []
+
+    def _on_training_start(self) -> None:
+        pass
+
+    def _on_rollout_start(self) -> None:
+        pass
+
+    def _on_step(self) -> bool:
+        action_x, action_y = self.training_env.envs[0].env.env.last_action
+        distance_from_goal = self.training_env.envs[0].env.env.last_distance
+        last_state = self.training_env.envs[0].env.env.current_obs
+        """with torch.no_grad():
+            value_actor = self.model.policy.actor(torch.Tensor(last_state['observation']))
+            value_critic = self.model.policy.critic(torch.Tensor(last_state['observation']))"""
+        self.logger.record('action_x', action_x)
+        self.logger.record('action_y', action_y)
+        self.logger.record('distance_from_goal', distance_from_goal)
+        return True
+
+    def _on_rollout_end(self) -> None:
+        pass
+
+    def _on_training_end(self) -> None:
+        pass

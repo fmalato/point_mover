@@ -38,9 +38,13 @@ class PointMover(gym.GoalEnv):
         self.obs_record_buffer = {}
         self.current_episode = None
         self.test = False
+        # Debugging purposes
+        self.last_action = None
+        self.last_distance = None
+        self.current_obs = None
 
     def step(self, action):
-        # TODO: Extend to move differently across different regions of the image (fisheye effect) (DONE)
+        self.last_action = action
         distance_from_center = (np.sqrt(np.power((self.point_position[0] - 0.5), 2) +
                                 np.power((self.point_position[1] - 0.5), 2)))
         if 0 <= distance_from_center <= 0.15:
@@ -63,6 +67,7 @@ class PointMover(gym.GoalEnv):
         # TODO: Discretize -1 for wrong time step, 0 for goal
         distance = (np.sqrt(np.power((self.point_position[0] - self.goal_state[0]), 2) +
                             np.power((self.point_position[1] - self.goal_state[1]), 2)))
+        self.last_distance = distance
         cost = -1.0
         if distance <= 0.01:
             cost = 0.0
@@ -75,6 +80,7 @@ class PointMover(gym.GoalEnv):
 
         self.step_count += 1
         obs = list(np.concatenate([self.point_position, self.goal_state], axis=0))
+        self.current_obs = {"observation": obs}
 
         return {"observation": obs, "achieved_goal": [obs[0], obs[1]], "desired_goal": self.goal_state}, cost, done, {}
 
