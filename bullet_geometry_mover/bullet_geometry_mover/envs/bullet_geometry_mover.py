@@ -10,7 +10,7 @@ from gym import spaces
 class BulletGeometryMover(gym.Env):
 
     def __init__(self, max_timesteps, frame_skip=1, camera_distance=5, on_linux=False, limit_fps=False):
-        super().__init__(self)
+        super().__init__()
         self.goal_state = [np.random.uniform(low=0.0, high=1.0), np.random.uniform(low=0.0, high=1.0)]
         self.camera_position = None
         self.step_count = 0
