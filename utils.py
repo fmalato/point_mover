@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.ddpg import DDPG
 
@@ -43,9 +44,9 @@ class TensorboardCallback(BaseCallback):
         action_x, action_y = self.training_env.envs[0].env.env.last_action
         distance_from_goal = self.training_env.envs[0].env.env.last_distance
         last_state = self.training_env.envs[0].env.env.current_obs
-        state = {"observation": torch.Tensor([last_state["observation"]]),
-                 "achieved_goal": torch.Tensor([last_state["achieved_goal"]]),
-                 "desired_goal": torch.Tensor([last_state["desired_goal"]])}
+        state = {"observation": torch.Tensor(np.array(last_state["observation"])),
+                 "achieved_goal": torch.Tensor(np.array(last_state["achieved_goal"])),
+                 "desired_goal": torch.Tensor(np.array(last_state["desired_goal"]))}
         self.logger.record('action_x', action_x)
         self.logger.record('action_y', action_y)
         self.logger.record('distance_from_goal', distance_from_goal)

@@ -21,7 +21,9 @@ class BulletGeometryMover(gym.Env):
             "desired_goal": spaces.Box(low=-3.0, high=3.0, shape=(2,), dtype=np.float32),
             "achieved_goal": spaces.Box(low=-3.0, high=3.0, shape=(2,), dtype=np.float32)
         })
-        self.action_space = spaces.Box(low=-0.1, high=0.1, shape=(2,), dtype=np.float32)
+        self.action_space = spaces.Tuple((spaces.Box(low=-1.0, high=-0.2, shape=(2,), dtype=np.float32),
+                                          spaces.Box(low=0.2, high=1.0, shape=(2,), dtype=np.float32))
+                                         )
         self.on_linux = on_linux
         if not self.on_linux:
             self.connection = p.connect(p.GUI)
