@@ -15,16 +15,16 @@ if __name__ == '__main__':
     num_test_games = 20
     buffer_size = 150000
     lr = 1e-5
-    total_timesteps = 200000
+    total_timesteps = 500000
     train = True
     save = True
     on_linux = True
-    tb_log_name = "PPO_200k_3D_norm"
+    tb_log_name = "PPO_500k_3D_norm"
     if train:
         limit_fps = False
     else:
         limit_fps = True
-    model_name = "PPO_200k_3D_2dof"
+    model_name = "PPO_500k_3D_2dof"
     goal_selection_strategy = 'future'
     env = gym.make('bullet_geometry_mover:GeometryMover-v0', max_timesteps=max_episode_length, on_linux=on_linux,
                    limit_fps=limit_fps, frame_skip=10)
