@@ -1,10 +1,10 @@
 import gym
-import torch
 import numpy as np
 import pybullet as p
 from gym.wrappers import TimeLimit
 from datetime import datetime
 from stable_baselines3 import DDPG, HerReplayBuffer
+from stable_baselines3.common.noise import NormalActionNoise
 from utils import ValuesCallback, TensorboardCallback
 
 
@@ -14,7 +14,7 @@ if __name__ == '__main__':
     num_sampled_goals = 4
     num_test_games = 20
     buffer_size = 150000
-    lr = 1e-3
+    lr = 1e-5
     total_timesteps = 500000
     train = True
     save = True
@@ -55,9 +55,10 @@ if __name__ == '__main__':
                      ),
                      verbose=1,
                      device="cuda",
-                     learning_starts=0,
-                     batch_size=100,
-                     tensorboard_log='tensorboard_logs/')
+                     learning_starts=10000,
+                     batch_size=1000,
+                     tensorboard_log='tensorboard_logs/',
+                     action_noise=NormalActionNoise(mean=np.zeros(shape=(2,)), sigma=np.array([3.0, 3.0])))
     else:
         """model = DDPG.load('saved_models/DDPG_HER_1kk_bullet_2dof.zip',
                           env=env)"""
