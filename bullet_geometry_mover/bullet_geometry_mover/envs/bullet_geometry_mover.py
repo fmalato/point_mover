@@ -17,9 +17,9 @@ class BulletGeometryMover(gym.Env):
         self.max_timesteps = max_timesteps
         self.frame_skip = frame_skip
         self.observation_space = spaces.Dict({
-            "observation": spaces.Box(low=-3.0, high=3.0, shape=(4,), dtype=np.float32),
-            "desired_goal": spaces.Box(low=-3.0, high=3.0, shape=(2,), dtype=np.float32),
-            "achieved_goal": spaces.Box(low=-3.0, high=3.0, shape=(2,), dtype=np.float32)
+            "observation": spaces.Box(low=-1.0, high=1.0, shape=(4,), dtype=np.float32),
+            "desired_goal": spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32),
+            "achieved_goal": spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
         })
         self.action_space = spaces.Tuple((spaces.Box(low=-1.0, high=-0.2, shape=(2,), dtype=np.float32),
                                           spaces.Box(low=0.2, high=1.0, shape=(2,), dtype=np.float32))
@@ -42,16 +42,16 @@ class BulletGeometryMover(gym.Env):
         # For debugging purposes
         self.last_action = a
         pointerPos, pointerOrn = p.getBasePositionAndOrientation(self.boxId[0])
-        new_pointer_pos = [np.clip(pointerPos[0] + a[0], -2.0, 2.0),
+        new_pointer_pos = [np.clip(pointerPos[0] + a[0], -3.0, 3.0),
                            pointerPos[1],
-                           np.clip(pointerPos[2] + a[1], 0.0, 3.0)]
+                           np.clip(pointerPos[2] + a[1], -3.0, 3.0)]
 
         p.resetBasePositionAndOrientation(self.boxId[0], new_pointer_pos, pointerOrn)
         p.resetDebugVisualizerCamera(self.camera_distance, 0, 0, new_pointer_pos)
         # TODO: change to relative coordinates    DONE
         # TODO: DEBUG: value maps from actor + critic
-        self.camera_position = [new_pointer_pos[0] - self.goal_state[0],
-                                new_pointer_pos[2] - self.goal_state[1]]
+        self.camera_position = [(new_pointer_pos[0] - self.goal_state[0]) / 3.0,
+                                (new_pointer_pos[2] - self.goal_state[1]) / 3.0]
         # self.camera_position = [new_pointer_pos[0], new_pointer_pos[2]]
         distance = (np.sqrt(np.power((self.camera_position[0] - self.goal_state[0]), 2) +
                             np.power((self.camera_position[1] - self.goal_state[1]), 2)))
@@ -89,12 +89,12 @@ class BulletGeometryMover(gym.Env):
         rod_pos = [np.random.uniform(low=-2.0, high=2.0), 0, np.random.uniform(low=1.0, high=3.0)]
         #rod_pos = [2, 0, 3]
         p.resetBasePositionAndOrientation(self.boxId[1], rod_pos, [0, 0, 0, 1])
-        self.goal_state = [rod_pos[0], rod_pos[2]]
+        self.goal_state = [rod_pos[0] / 3.0, rod_pos[2] / 3.0]
         # Reset pointer position
         restart_position = [np.random.uniform(low=-2.0, high=2.0), 1, np.random.uniform(low=0.0, high=3.0)]
         p.resetBasePositionAndOrientation(self.boxId[0], restart_position, [0, 0, 0, 1])
-        self.camera_position = [restart_position[0] - self.goal_state[0],
-                                restart_position[2] - self.goal_state[1]]
+        self.camera_position = [(restart_position[0] / 3.0) - self.goal_state[0],
+                                (restart_position[2] / 3.0) - self.goal_state[1]]
         # self.camera_position = [restart_position[0], restart_position[2]]
         # Reset camera position
         p.resetDebugVisualizerCamera(self.camera_distance, 0, 0, [restart_position[0], 0, restart_position[2]])

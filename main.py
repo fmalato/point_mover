@@ -5,8 +5,6 @@ import pybullet as p
 from gym.wrappers import TimeLimit
 from datetime import datetime
 from stable_baselines3 import DDPG, HerReplayBuffer
-from stable_baselines3.common.noise import NormalActionNoise
-from stable_baselines3.common.vec_env import VecFrameStack
 from utils import ValuesCallback, TensorboardCallback
 
 
@@ -21,7 +19,7 @@ if __name__ == '__main__':
     train = True
     save = True
     on_linux = True
-    tb_log_name = "500k_3D"
+    tb_log_name = "500k_3D_norm"
     if train:
         limit_fps = False
     else:
