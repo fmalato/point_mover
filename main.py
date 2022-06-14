@@ -3,7 +3,7 @@ import numpy as np
 import pybullet as p
 from gym.wrappers import TimeLimit
 from datetime import datetime
-from stable_baselines3 import DDPG, HerReplayBuffer
+from stable_baselines3 import DDPG, HerReplayBuffer, DQN
 from stable_baselines3.common.noise import NormalActionNoise
 from utils import ValuesCallback, TensorboardCallback
 
@@ -60,9 +60,9 @@ if __name__ == '__main__':
                      tensorboard_log='tensorboard_logs/',
                      action_noise=NormalActionNoise(mean=0, sigma=3))
     else:
-        """model = DDPG.load('saved_models/DDPG_HER_1kk_bullet_2dof.zip',
-                          env=env)"""
-        model = DDPG(policy="MultiInputPolicy",
+        model = DDPG.load('saved_models/DDPG_HER_500k_3D_2dof.zip',
+                          env=env)
+        """model = DDPG(policy="MultiInputPolicy",
                      env=env,
                      replay_buffer_class=HerReplayBuffer,
                      buffer_size=buffer_size,
@@ -73,7 +73,7 @@ if __name__ == '__main__':
                          online_sampling=online_sampling,
                          max_episode_length=max_episode_length,
                      ),
-                     verbose=1)
+                     verbose=1)"""
     if train:
         callback = TensorboardCallback(verbose=0)
         model.learn(total_timesteps=total_timesteps, callback=callback, tb_log_name=tb_log_name)
