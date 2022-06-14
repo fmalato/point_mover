@@ -58,7 +58,7 @@ if __name__ == '__main__':
                      learning_starts=10000,
                      batch_size=1000,
                      tensorboard_log='tensorboard_logs/',
-                     action_noise=NormalActionNoise(mean=np.zeros(shape=(2,)), sigma=np.array([3.0, 3.0])))
+                     action_noise=NormalActionNoise(mean=0, sigma=3))
     else:
         """model = DDPG.load('saved_models/DDPG_HER_1kk_bullet_2dof.zip',
                           env=env)"""
