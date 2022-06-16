@@ -16,16 +16,16 @@ if __name__ == '__main__':
     num_test_games = 20
     buffer_size = 500000
     lr = 1e-5
-    total_timesteps = 100000
+    total_timesteps = 500000
     train = True
     save = True
     on_linux = True
-    tb_log_name = "100k_3D_norm"
+    tb_log_name = "500k_3D_big_buffer"
     if train:
         limit_fps = False
     else:
         limit_fps = True
-    model_name = "DDPG_HER_100k_3D_2dof"
+    model_name = "DDPG_HER_500k_3D_big_buffer"
     goal_selection_strategy = 'future'
     env = gym.make('bullet_geometry_mover:GeometryMover-v0', max_timesteps=max_episode_length, on_linux=on_linux,
                    limit_fps=limit_fps, frame_skip=10)
@@ -77,7 +77,7 @@ if __name__ == '__main__':
                      verbose=1)"""
     if train:
         eval_env = gym.make('bullet_geometry_mover:GeometryMover-v0', max_timesteps=max_episode_length, on_linux=True,
-                   limit_fps=False, frame_skip=10)
+                            limit_fps=False, frame_skip=10)
         eval_callback = EvalCallback(eval_env=eval_env, deterministic=True, log_path='evaluation_logs/',
                                      eval_freq=20000)
         checkpoint_callback = CheckpointCallback(save_freq=20000, save_path='checkpoints/',
