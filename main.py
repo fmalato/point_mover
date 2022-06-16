@@ -5,6 +5,7 @@ from gym.wrappers import TimeLimit
 from datetime import datetime
 from stable_baselines3 import DDPG, HerReplayBuffer, DQN
 from stable_baselines3.common.noise import NormalActionNoise
+from stable_baselines3.common.callbacks import EvalCallback
 from utils import ValuesCallback, TensorboardCallback
 
 
@@ -15,16 +16,16 @@ if __name__ == '__main__':
     num_test_games = 20
     buffer_size = 150000
     lr = 1e-5
-    total_timesteps = 270000
+    total_timesteps = 40000
     train = True
     save = True
     on_linux = True
-    tb_log_name = "270k_3D_norm"
+    tb_log_name = "40k_3D_norm"
     if train:
         limit_fps = False
     else:
         limit_fps = True
-    model_name = "DDPG_HER_270k_3D_2dof"
+    model_name = "DDPG_HER_40k_3D_2dof"
     goal_selection_strategy = 'future'
     env = gym.make('bullet_geometry_mover:GeometryMover-v0', max_timesteps=max_episode_length, on_linux=on_linux,
                    limit_fps=limit_fps, frame_skip=10)
@@ -75,7 +76,10 @@ if __name__ == '__main__':
                      ),
                      verbose=1)"""
     if train:
-        callback = TensorboardCallback(verbose=0)
+        eval_env = gym.make('bullet_geometry_mover:GeometryMover-v0', max_timesteps=max_episode_length, on_linux=True,
+                   limit_fps=False, frame_skip=10)
+        callback = EvalCallback(eval_env=eval_env, deterministic=True, log_path='evaluation_logs/',
+                                eval_freq=20000)
         model.learn(total_timesteps=total_timesteps, callback=callback, tb_log_name=tb_log_name)
         fname = datetime.now().strftime("%H_%M_%S")
         if save:
