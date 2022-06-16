@@ -17,9 +17,9 @@ if __name__ == '__main__':
     buffer_size = 500000
     lr = 1e-5
     total_timesteps = 100000
-    train = False
-    save = False
-    on_linux = False
+    train = True
+    save = True
+    on_linux = True
     tb_log_name = "100k_3D_norm"
     if train:
         limit_fps = False
