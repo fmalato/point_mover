@@ -17,9 +17,9 @@ class BulletGeometryMover(gym.Env):
         self.max_timesteps = max_timesteps
         self.frame_skip = frame_skip
         self.observation_space = spaces.Dict({
-            "observation": spaces.Box(low=-3.0, high=3.0, shape=(4,), dtype=np.float32),
-            "desired_goal": spaces.Box(low=-3.0, high=3.0, shape=(2,), dtype=np.float32),
-            "achieved_goal": spaces.Box(low=-3.0, high=3.0, shape=(2,), dtype=np.float32)
+            "observation": spaces.Box(low=-1.0, high=1.0, shape=(4,), dtype=np.float32),
+            "desired_goal": spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32),
+            "achieved_goal": spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
         })
         self.action_space = spaces.Box(low=-0.05, high=0.05, shape=(2,), dtype=np.float32)
         self.on_linux = on_linux
@@ -35,6 +35,7 @@ class BulletGeometryMover(gym.Env):
         self.last_distance = None
         self.current_obs = None
         self.num_envs = 1
+        self.rod_pos = None
 
     def step(self, a):
         # For debugging purposes
@@ -49,8 +50,7 @@ class BulletGeometryMover(gym.Env):
         p.resetDebugVisualizerCamera(self.camera_distance, 0, 0, new_pointer_pos)
         # TODO: change to relative coordinates    DONE
         # TODO: DEBUG: value maps from actor + critic
-        self.camera_position = [(new_pointer_pos[0] - self.goal_state[0]),
-                                (new_pointer_pos[2] - self.goal_state[1])]
+        self.camera_position = [new_pointer_pos[0], new_pointer_pos[2]]
         # self.camera_position = [new_pointer_pos[0], new_pointer_pos[2]]
         distance = (np.sqrt(np.power((self.camera_position[0] - self.goal_state[0]), 2) +
                             np.power((self.camera_position[1] - self.goal_state[1]), 2)))
@@ -59,15 +59,13 @@ class BulletGeometryMover(gym.Env):
         p.stepSimulation()
         if self.limit_fps:
             time.sleep(1. / 60.)
-        #cost = 0.0
-        cost = -0.02 * distance
-        if distance <= 0.01:
-            done = True
-        """if distance <= 0.1:
-            cost = 1.0
+        cost = -1.0
+        #cost = -0.5 * distance
+        if distance <= 0.1:
+            cost = 0.0
             done = True
         else:
-            done = False"""
+            done = False
 
         self.step_count += 1
         if self.step_count > self.max_timesteps:
@@ -81,24 +79,23 @@ class BulletGeometryMover(gym.Env):
         return obs, cost, done, {}
 
     def _get_obs(self):
-        return {"observation": np.concatenate([np.array(self.camera_position) / 3.0, np.array(self.goal_state) / 3.0]),
-                "achieved_goal": np.array(np.array(self.camera_position) / 3.0),
-                "desired_goal": np.array(np.array(self.goal_state) / 3.0)}
+        return {"observation": np.concatenate([self.camera_position, self.goal_state]),
+                "achieved_goal": np.array(self.camera_position),
+                "desired_goal": np.array(self.goal_state)}
 
     def reset(self):
         # Reset rod position
-        rod_pos = [np.random.uniform(low=-2.0, high=2.0), 0, np.random.uniform(low=1.0, high=3.0)]
+        self.rod_pos = [np.random.uniform(low=-2.0, high=2.0), 0, np.random.uniform(low=1.0, high=3.0)]
         #rod_pos = [2, 0, 3]
-        p.resetBasePositionAndOrientation(self.boxId[1], rod_pos, [0, 0, 0, 1])
-        self.goal_state = [rod_pos[0], rod_pos[2]]
+        p.resetBasePositionAndOrientation(self.boxId[1], self.rod_pos, [0, 0, 0, 1])
+        self.goal_state = [self.rod_pos[0], self.rod_pos[2]]
         # Reset pointer position
-        restart_position = [np.random.uniform(low=-2.0, high=2.0), 1, np.random.uniform(low=0.0, high=3.0)]
-        p.resetBasePositionAndOrientation(self.boxId[0], restart_position, [0, 0, 0, 1])
-        self.camera_position = [(restart_position[0]) - self.goal_state[0],
-                                (restart_position[2]) - self.goal_state[1]]
+        self.restart_position = [np.random.uniform(low=-2.0, high=2.0), 1, np.random.uniform(low=0.0, high=3.0)]
+        p.resetBasePositionAndOrientation(self.boxId[0], self.restart_position, [0, 0, 0, 1])
+        self.camera_position = [self.restart_position[0], self.restart_position[2]]
         # self.camera_position = [restart_position[0], restart_position[2]]
         # Reset camera position
-        p.resetDebugVisualizerCamera(self.camera_distance, 0, 0, [restart_position[0], 0, restart_position[2]])
+        p.resetDebugVisualizerCamera(self.camera_distance, 0, 0, [self.restart_position[0], 0, self.restart_position[2]])
         # Reset step count
         self.step_count = 0
 
