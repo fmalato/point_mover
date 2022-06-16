@@ -5,7 +5,7 @@ from gym.wrappers import TimeLimit
 from datetime import datetime
 from stable_baselines3 import DDPG, HerReplayBuffer, DQN
 from stable_baselines3.common.noise import NormalActionNoise
-from stable_baselines3.common.callbacks import EvalCallback
+from stable_baselines3.common.callbacks import EvalCallback, CheckpointCallback
 from utils import ValuesCallback, TensorboardCallback
 
 
@@ -14,18 +14,18 @@ if __name__ == '__main__':
     online_sampling = True
     num_sampled_goals = 4
     num_test_games = 20
-    buffer_size = 150000
+    buffer_size = 500000
     lr = 1e-5
-    total_timesteps = 40000
-    train = True
-    save = True
-    on_linux = True
-    tb_log_name = "40k_3D_norm"
+    total_timesteps = 100000
+    train = False
+    save = False
+    on_linux = False
+    tb_log_name = "100k_3D_norm"
     if train:
         limit_fps = False
     else:
         limit_fps = True
-    model_name = "DDPG_HER_40k_3D_2dof"
+    model_name = "DDPG_HER_100k_3D_2dof"
     goal_selection_strategy = 'future'
     env = gym.make('bullet_geometry_mover:GeometryMover-v0', max_timesteps=max_episode_length, on_linux=on_linux,
                    limit_fps=limit_fps, frame_skip=10)
@@ -61,7 +61,7 @@ if __name__ == '__main__':
                      tensorboard_log='tensorboard_logs/',
                      action_noise=NormalActionNoise(mean=0, sigma=3))
     else:
-        model = DDPG.load('saved_models/DDPG_HER_500k_3D_2dof.zip',
+        model = DDPG.load('saved_models/DDPG_HER_40k_3D_2dof.zip',
                           env=env)
         """model = DDPG(policy="MultiInputPolicy",
                      env=env,
@@ -78,9 +78,12 @@ if __name__ == '__main__':
     if train:
         eval_env = gym.make('bullet_geometry_mover:GeometryMover-v0', max_timesteps=max_episode_length, on_linux=True,
                    limit_fps=False, frame_skip=10)
-        callback = EvalCallback(eval_env=eval_env, deterministic=True, log_path='evaluation_logs/',
-                                eval_freq=20000)
-        model.learn(total_timesteps=total_timesteps, callback=callback, tb_log_name=tb_log_name)
+        eval_callback = EvalCallback(eval_env=eval_env, deterministic=True, log_path='evaluation_logs/',
+                                     eval_freq=20000)
+        checkpoint_callback = CheckpointCallback(save_freq=20000, save_path='checkpoints/',
+                                                 name_prefix='{x}_chkp'.format(x=model_name))
+        model.learn(total_timesteps=total_timesteps, callback=[eval_callback, checkpoint_callback],
+                    tb_log_name=tb_log_name)
         fname = datetime.now().strftime("%H_%M_%S")
         if save:
             model.save("saved_models/{name}".format(name=model_name))
