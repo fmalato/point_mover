@@ -59,7 +59,8 @@ if __name__ == '__main__':
                      learning_starts=10000,
                      batch_size=1000,
                      tensorboard_log='tensorboard_logs/',
-                     action_noise=OrnsteinUhlenbeckActionNoise(mean=1.2, sigma=0.3, theta=1, initial_noise=2))
+                     action_noise=OrnsteinUhlenbeckActionNoise(mean=np.array([1.2, 1.2]), sigma=np.array([0.3, 0.3]),
+                                                               theta=0.05, initial_noise=np.ndarray([2, 2])))
     else:
         model = DDPG.load('saved_models/DDPG_HER_100k_3D_2dof.zip',
                           env=env)
