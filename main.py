@@ -16,16 +16,16 @@ if __name__ == '__main__':
     num_test_games = 20
     buffer_size = 500000
     lr = 1e-5
-    total_timesteps = 500000
+    total_timesteps = 700000
     train = True
     save = True
     on_linux = True
-    tb_log_name = "500k_3D_ornstein"
+    tb_log_name = "700k_3D_relaxed_distance"
     if train:
         limit_fps = False
     else:
         limit_fps = False
-    model_name = "DDPG_HER_500k_3D_ornstein"
+    model_name = "DDPG_HER_700k_3D_relaxed_distance"
     goal_selection_strategy = 'future'
     env = gym.make('bullet_geometry_mover:GeometryMover-v0', max_timesteps=max_episode_length, on_linux=on_linux,
                    limit_fps=limit_fps, frame_skip=10)
@@ -42,6 +42,8 @@ if __name__ == '__main__':
         Still, why should it move only on one direction?"""
         """
         action_noise=NormalActionNoise(mean=0, sigma=1)
+        action_noise=OrnsteinUhlenbeckActionNoise(mean=np.array(1.2), sigma=np.array(0.3), theta=0.05,
+                                                               initial_noise=np.ndarray(2)))
         """
         model = DDPG(policy="MultiInputPolicy",
                      env=env,
@@ -59,10 +61,9 @@ if __name__ == '__main__':
                      learning_starts=10000,
                      batch_size=1000,
                      tensorboard_log='tensorboard_logs/',
-                     action_noise=OrnsteinUhlenbeckActionNoise(mean=np.array(1.2), sigma=np.array(0.3), theta=0.05,
-                                                               initial_noise=np.ndarray(2)))
+                     action_noise=NormalActionNoise(mean=0, sigma=4))
     else:
-        model = DDPG.load('saved_models/DDPG_HER_100k_3D_2dof.zip',
+        model = DDPG.load('checkpoints/DDPG_HER_3kk_3D_big_buffer_chkp_700000_steps.zip',
                           env=env)
         """model = DDPG(policy="MultiInputPolicy",
                      env=env,

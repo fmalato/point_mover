@@ -61,7 +61,7 @@ class BulletGeometryMover(gym.Env):
             time.sleep(1. / 60.)
         cost = -1.0
         #cost = -0.5 * distance
-        if distance <= 0.1:
+        if distance <= 0.5:
             cost = 0.0
             done = True
         else:
