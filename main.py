@@ -4,7 +4,7 @@ import pybullet as p
 from gym.wrappers import TimeLimit
 from datetime import datetime
 from stable_baselines3 import DDPG, HerReplayBuffer, DQN
-from stable_baselines3.common.noise import NormalActionNoise
+from stable_baselines3.common.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise
 from stable_baselines3.common.callbacks import EvalCallback, CheckpointCallback
 from utils import ValuesCallback, TensorboardCallback
 
@@ -20,12 +20,12 @@ if __name__ == '__main__':
     train = True
     save = True
     on_linux = True
-    tb_log_name = "500k_3D_big_buffer"
+    tb_log_name = "500k_3D_ornstein"
     if train:
         limit_fps = False
     else:
-        limit_fps = True
-    model_name = "DDPG_HER_500k_3D_big_buffer"
+        limit_fps = False
+    model_name = "DDPG_HER_500k_3D_ornstein"
     goal_selection_strategy = 'future'
     env = gym.make('bullet_geometry_mover:GeometryMover-v0', max_timesteps=max_episode_length, on_linux=on_linux,
                    limit_fps=limit_fps, frame_skip=10)
@@ -59,9 +59,9 @@ if __name__ == '__main__':
                      learning_starts=10000,
                      batch_size=1000,
                      tensorboard_log='tensorboard_logs/',
-                     action_noise=NormalActionNoise(mean=0, sigma=3))
+                     action_noise=OrnsteinUhlenbeckActionNoise(mean=1.2, sigma=0.3, theta=1, initial_noise=2))
     else:
-        model = DDPG.load('saved_models/DDPG_HER_40k_3D_2dof.zip',
+        model = DDPG.load('saved_models/DDPG_HER_100k_3D_2dof.zip',
                           env=env)
         """model = DDPG(policy="MultiInputPolicy",
                      env=env,
@@ -89,9 +89,6 @@ if __name__ == '__main__':
             model.save("saved_models/{name}".format(name=model_name))
     else:
         env.test = True
-        ctrl_up = [[0, 0.1] for x in range(100)]
-        ctrl_left = [[0.1, 0] for x in range(100)]
-        ctrls = np.concatenate([ctrl_up, ctrl_left])
         for i in range(num_test_games):
             obs = env.reset()
             total_reward = 0.0
@@ -101,20 +98,11 @@ if __name__ == '__main__':
             print('Initial position: {x}'.format(x=obs['observation']))
             while not done:
                 action, _states = model.predict(obs)
-                # Override actions with random ones
-                action = [np.random.uniform(-0.5, 0.5), np.random.uniform(-0.5, 0.5)]
                 obs, rewards, done, info = env.step(action)
                 total_reward += rewards
                 num_steps += 1
+                # Just for the 2D env
                 #env.render()
-            """for x, a in enumerate(ctrls):
-                if not done:
-                    obs, rewards, done, info = env.step(a)
-                    total_reward += rewards
-                    num_steps += 1
-                    #env.render()
-                else:
-                    break"""
             print('Final position: {x}'.format(x=obs['observation']))
             print('Episode reward: {r} - Number of steps: {s}'.format(r=total_reward, s=num_steps))
     p.disconnect(env.env.connection)
