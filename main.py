@@ -25,7 +25,7 @@ if __name__ == '__main__':
     if train:
         limit_fps = False
     else:
-        limit_fps = False
+        limit_fps = True
     model_name = "DDPG_HER_700k_3D_relaxed_distance"
     goal_selection_strategy = 'future'
     env = gym.make('bullet_geometry_mover:GeometryMover-v0', max_timesteps=max_episode_length, on_linux=on_linux,
