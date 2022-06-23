@@ -19,6 +19,7 @@ if __name__ == '__main__':
     total_timesteps = 700000
     train = True
     save = True
+    # Visualization of the environment: False - No visualization, Yes - Visualization
     on_linux = True
     tb_log_name = "700k_3D_relaxed_distance"
     if train:
