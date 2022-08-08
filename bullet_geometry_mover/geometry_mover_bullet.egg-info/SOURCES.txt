@@ -1,4 +1,7 @@
 setup.py
+bullet_geometry_mover/__init__.py
+bullet_geometry_mover/envs/__init__.py
+bullet_geometry_mover/envs/bullet_geometry_mover.py
 geometry_mover_bullet.egg-info/PKG-INFO
 geometry_mover_bullet.egg-info/SOURCES.txt
 geometry_mover_bullet.egg-info/dependency_links.txt

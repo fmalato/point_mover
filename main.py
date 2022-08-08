@@ -10,6 +10,7 @@ from utils import ValuesCallback, TensorboardCallback
 
 
 if __name__ == '__main__':
+    # Training hyperparameters
     max_episode_length = 1000
     online_sampling = True
     num_sampled_goals = 4
@@ -19,19 +20,25 @@ if __name__ == '__main__':
     total_timesteps = 700000
     train = True
     save = True
+
     # Visualization of the environment: False - No visualization, Yes - Visualization
-    on_linux = True
+    on_linux = False
     tb_log_name = "700k_3D_relaxed_distance"
+
     if train:
         limit_fps = False
     else:
         limit_fps = True
+
     model_name = "DDPG_HER_700k_3D_relaxed_distance"
     goal_selection_strategy = 'future'
+
     env = gym.make('bullet_geometry_mover:GeometryMover-v0', max_timesteps=max_episode_length, on_linux=on_linux,
                    limit_fps=limit_fps, frame_skip=10)
-    #env = gym.make('point_mover:point_mover-v0', max_timesteps=max_episode_length)
+    # env = gym.make('point_mover:point_mover-v0', max_timesteps=max_episode_length)
+
     env = TimeLimit(env, max_episode_steps=max_episode_length)
+
     obs = env.reset()
     # TODO: DDPG AC + HER
     if train:
@@ -62,7 +69,7 @@ if __name__ == '__main__':
                      learning_starts=10000,
                      batch_size=1000,
                      tensorboard_log='tensorboard_logs/',
-                     action_noise=NormalActionNoise(mean=0, sigma=4))
+                     action_noise=NormalActionNoise(mean=np.array([[0]], np.int32), sigma=np.array([[4]], np.int32)))
     else:
         model = DDPG.load('checkpoints/DDPG_HER_3kk_3D_big_buffer_chkp_700000_steps.zip',
                           env=env)
@@ -78,8 +85,9 @@ if __name__ == '__main__':
                          max_episode_length=max_episode_length,
                      ),
                      verbose=1)"""
+
     if train:
-        eval_env = gym.make('bullet_geometry_mover:GeometryMover-v0', max_timesteps=max_episode_length, on_linux=True,
+        eval_env = gym.make('bullet_geometry_mover:GeometryMover-v0', max_timesteps=max_episode_length, on_linux=False,
                             limit_fps=False, frame_skip=10)
         eval_callback = EvalCallback(eval_env=eval_env, deterministic=True, log_path='evaluation_logs/',
                                      eval_freq=20000)
@@ -105,7 +113,8 @@ if __name__ == '__main__':
                 total_reward += rewards
                 num_steps += 1
                 # Just for the 2D env
-                #env.render()
+                # env.render()
             print('Final position: {x}'.format(x=obs['observation']))
             print('Episode reward: {r} - Number of steps: {s}'.format(r=total_reward, s=num_steps))
+
     p.disconnect(env.env.connection)

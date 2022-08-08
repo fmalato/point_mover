@@ -1,9 +1,10 @@
-python==3.8.5
 gym==0.21.0
-stable-baselines3==1.4.0
+stable-baselines3==1.5.0
 tensorflow==2.8.0
 pyglet==1.5.21
 torch==1.11.0+cu113
 torchvision==0.12.0+cu113
 torchaudio==0.11.0+cu113
 pybullet==3.2.4
+protobuf==3.20.*
+--extra-index-url https://download.pytorch.org/whl/cu113/
